@@ -1,6 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ToDoList.Data;
+using ToDoList.Data.Seeder;
+using ToDoList.Services;
+using ToDoList.Services.Interface;
+using ToDoList.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,8 +14,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddRoles<IdentityRole>()
+    .AddUserManager<UserManager<ApplicationUser>>()
+    .AddSignInManager<SignInManager<ApplicationUser>>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+// this one is for testing.
+//builder.Services.AddSingleton<ITodoItemService, FakeTodoItemService>();
+builder.Services.AddScoped<ITodoItemService, TodoItemService>();
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -20,6 +33,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
+    // Seeds data into Database
+    await User.InitializeAsync(app);
 }
 else
 {
@@ -40,5 +55,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
+
+
 
 app.Run();
