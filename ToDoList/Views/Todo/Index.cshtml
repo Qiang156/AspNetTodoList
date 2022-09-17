@@ -29,20 +29,9 @@
 
       @foreach (var item in Model.Items)
       {
-        <tr>  
-            
-            @if(item.isDone) 
-            {
-                <td>&#x2714;</td>
-                <td class="done">@item.title</td>
-            } else {
-                <td>
-                    <input type="checkbox" class="done-checkbox" value="@item.id" checked="@item.isDone" disabled="@item.isDone">
-                </td>
-                <td>@item.title</td>
-                
-            }
-            
+        <tr class="@Model.IsDoneStyle(item)">
+            <td><input type="checkbox" class="done-checkbox" value="@item.id" checked="@item.isDone" disabled="@item.isDone"></td>
+            <td>@item.title</td>
             <td>@item.dueAt.Humanize()</td>
             <td>@item.createdAt.Humanize()</td>
             <td>@item.updatedAt.Humanize()</td>

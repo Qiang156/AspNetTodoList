@@ -23,6 +23,7 @@ public static class User
 
             var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             await EnsureTestAdminAsync(userManager);
+            await EnsureTestGuestAsync(userManager);
         }
     }
 
@@ -30,10 +31,12 @@ public static class User
     private static async Task EnsureRolesAsync(RoleManager<IdentityRole> roleManager)
     {
         var alreadyExists = await roleManager.RoleExistsAsync(Constants.AdministratorRole);
-
         if (alreadyExists) return;
-
         await roleManager.CreateAsync(new IdentityRole(Constants.AdministratorRole));
+
+        alreadyExists = await roleManager.RoleExistsAsync(Constants.GuestRole);
+        if (alreadyExists) return;
+        await roleManager.CreateAsync(new IdentityRole(Constants.GuestRole));
     }
 
     private static async Task EnsureTestAdminAsync(UserManager<ApplicationUser> userManager)
@@ -51,5 +54,30 @@ public static class User
         };
         await userManager.CreateAsync(testAdmin, "NotSecure123!!");
         await userManager.AddToRoleAsync(testAdmin, Constants.AdministratorRole);
+        
     }
+
+    private static async Task EnsureTestGuestAsync(UserManager<ApplicationUser> userManager)
+    {
+        var testGuest = await userManager.Users
+            .Where(x => x.UserName == "guest@todo.local")
+            .SingleOrDefaultAsync();
+
+        if (testGuest != null) return;
+
+
+        testGuest = new ApplicationUser 
+        {
+            UserName = "guest@todo.local",
+            Email = "guest@todo.local"
+        };
+        await userManager.CreateAsync(testGuest, "NotSecure123!!");
+        await userManager.AddToRoleAsync(testGuest, Constants.GuestRole);
+        
+    }
+
+    // private static async Task ClearAllUserAsync(UserManager<ApplicationUser> userManager)
+    // {
+    //     // await userManager.Users.
+    // }
 }
