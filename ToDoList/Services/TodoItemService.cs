@@ -24,7 +24,7 @@ namespace ToDoList.Services
         public async Task<TodoItem[]> getIncompleteItemsAsync(ApplicationUser user)
         {
             
-            return await _context.Items.Where(
+            return await _context.Item.Where(
                 item => item.isDelete == false && item.userId == user.Id
                 ).ToArrayAsync();
 
@@ -38,7 +38,7 @@ namespace ToDoList.Services
             Item.createdAt = DateTimeOffset.Now.DateTime;
             Item.userId = user.Id;
 
-            _context.Items.Add(Item);
+            _context.Item.Add(Item);
             
             var res = await _context.SaveChangesAsync();
 
@@ -47,7 +47,7 @@ namespace ToDoList.Services
 
         public async Task<bool> MarkDoneAsync(Guid id, ApplicationUser user)
         {
-            var item = await _context.Items.Where(
+            var item = await _context.Item.Where(
                 Item => Item.id == id && Item.userId == user.Id
                 ).SingleOrDefaultAsync();                
             if (item == null) return false;
@@ -61,7 +61,7 @@ namespace ToDoList.Services
 
         public async Task<bool> SoftDeleteAsync(Guid id, ApplicationUser user)
         {
-            var item = await _context.Items.Where(
+            var item = await _context.Item.Where(
                 Item => Item.id == id && Item.userId == user.Id
                 ).SingleOrDefaultAsync();
             if (item == null) return false;

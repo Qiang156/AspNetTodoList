@@ -7,16 +7,15 @@ namespace ToDoList.Data;
 
 public class ApplicationDbContext : IdentityDbContext
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }
 
-    public DbSet<TodoItem> Items { get; set; } = null!;
-    public DbSet<ApplicationUser> AspNetUsers { get; set; } = null!;
+    public DbSet<TodoItem> Item { get; set; }
+    public DbSet<ApplicationUser> User { get; set; }
 
-    protected override void OnModelCreating(ModelBuilder builder)
-    {
-        base.OnModelCreating(builder);
-    }
+    // protected override void OnModelCreating(ModelBuilder builder)
+    // {
+    //     base.OnModelCreating(builder);
+    // }
 }
