@@ -6,45 +6,61 @@ using ToDoList.Models.Entity;
 using ToDoList.Services;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using Microsoft.Extensions.DependencyInjection;
+
 
 namespace ToDoList.unitTests;
 
 public class TodoItemServiceShould
 {
+
+    private readonly ApplicationDbContext _context;
+
+    public TodoItemServiceShould()
+    {
+        // Set up a context (connection to the "DB") for writing
+        // var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            // .UseInMemoryDatabase(databaseName: "Test_AddNewItem").Options;
+        _context = new ApplicationDbContext(CreateDbContextOptions("test_db"));
+        // _context.Database.EnsureCreated();
+    }
+
+    public static DbContextOptions<ApplicationDbContext> CreateDbContextOptions(string databaseName)
+    {
+        var serviceProvider = new ServiceCollection().
+            AddEntityFrameworkInMemoryDatabase()
+            .BuildServiceProvider();
+
+        var builder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        builder.UseInMemoryDatabase(databaseName)
+            .UseInternalServiceProvider(serviceProvider);
+
+        return builder.Options;
+    }
+
     [Fact]
     public async Task TestAddItemAsync()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: "Test_AddNewItem").Options;
-
-        // Set up a context (connection to the "DB") for writing
-        using (var inMemoryContext = new ApplicationDbContext(options))
+        var service = new TodoItemService(_context);
+        var fakeUser = new ApplicationUser
         {
-            var service = new TodoItemService(inMemoryContext);
+            Id = "fake-000",
+            UserName = "fake@example.com",
+            Email = "fake@example.com"
+        };
+        _context.Items.Add(new TodoItem { title = "Testing?" });
+        _context.SaveChanges();
+        
+        //await service.addItemAsync(new TodoItem { title = "Testing?" }, fakeUser);
 
-            var fakeUser = new ApplicationUser
-            {
-                Id = "fake-000",
-                UserName = "fake@example.com",
-                Email = "fake@example.com"
-            };
-
-            await service.addItemAsync(new TodoItem { title = "Testing?" }, fakeUser);
-        }
-
-        // Use a separate context to read the data back from the DB
-        using (var inMemoryContext = new ApplicationDbContext(options))
-        {
-            Assert.False(false);
-            //Assert.Equal(1, await inMemoryContext.Items.CountAsync());
-            
-            // var item = await inMemoryContext.Items.FirstAsync();
-            // Assert.Equal("fake-000", item.userId);
-            // Assert.Equal("Testing?", item.title);
-            // Assert.False(item.isDone);
-            // Assert.True(DateTimeOffset.Now.AddDays(3) - item.dueAt < TimeSpan.FromSeconds(1));
-        }
-
+        Assert.False(false);
+        //Assert.Equal(1, await inMemoryContext.Items.CountAsync());
+        
+        // var item = await inMemoryContext.Items.FirstAsync();
+        // Assert.Equal("fake-000", item.userId);
+        // Assert.Equal("Testing?", item.title);
+        // Assert.False(item.isDone);
+        // Assert.True(DateTimeOffset.Now.AddDays(3) - item.dueAt < TimeSpan.FromSeconds(1));
 
     }
 }
