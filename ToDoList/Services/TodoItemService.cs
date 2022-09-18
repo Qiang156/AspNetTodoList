@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 using ToDoList.Data;
 using ToDoList.Models.Entity;
 using ToDoList.Models;
+using ToDoList.Services.Interface;
 using Microsoft.EntityFrameworkCore;
 
-namespace ToDoList.Services.Interface
+namespace ToDoList.Services
 {
     
     public class TodoItemService : ITodoItemService
@@ -43,6 +44,7 @@ namespace ToDoList.Services.Interface
 
             return res == 1;
         }
+
         public async Task<bool> MarkDoneAsync(Guid id, ApplicationUser user)
         {
             var item = await _context.Items.Where(
