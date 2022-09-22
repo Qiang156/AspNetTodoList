@@ -6,7 +6,6 @@ using ToDoList.Models.Entity;
 using ToDoList.Services;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 
@@ -44,10 +43,19 @@ public class TestService : IDisposable
         var item = await _context.Item.FirstAsync();
         Assert.Equal("fake-000", item.userId);
         Assert.Equal("Testing?", item.title);
+        Assert.True(DateTimeOffset.Now.AddDays(-1) - item.dueAt < TimeSpan.FromSeconds(1));
+
         Assert.False(item.isDone);
-        // Assert.True(DateTimeOffset.Now.AddDays(1) - item.dueAt < TimeSpan.FromSeconds(1));
+        await service.MarkDoneAsync(item.id, fakeUser);
+        Assert.True(item.isDone);
+
+        Assert.False(item.isDelete);
+        await service.SoftDeleteAsync(item.id, fakeUser);
+        Assert.True(item.isDelete);
 
     }
+
+
 
     public void Dispose()
     {
